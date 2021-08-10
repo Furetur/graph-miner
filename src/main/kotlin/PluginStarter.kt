@@ -7,13 +7,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiMethod
+import com.intellij.psi.*
 import com.intellij.psi.controlFlow.AllVariablesControlFlowPolicy
 import com.intellij.psi.controlFlow.ControlFlow
 import com.intellij.psi.controlFlow.ControlFlowFactory
 import com.intellij.psi.util.descendantsOfType
+import graph.steps.lastReadWrite.LastReadWriteStep
 import kotlin.system.exitProcess
 
 object PluginStarter : ApplicationStarter {
@@ -32,21 +31,17 @@ class PluginCommand : CliktCommand() {
         val project = ProjectUtil.openOrImport(input.toPath())
         println("Opened $project")
         for (psiFile in project.psiFiles) {
-            psiFile.descendantsOfType<PsiMethod>().forEach(::processMethod)
+            println("Building graph for file $psiFile")
+            processElement(psiFile)
         }
     }
 
-    private fun processMethod(psiMethod: PsiMethod) {
-        println(psiMethod.controlFlow)
+    private fun processElement(psiElement: PsiElement) {
+        val graphBuilder = GraphBuilder(psiElement)
+        LastReadWriteStep.build(graphBuilder)
+        println(graphBuilder.graph())
     }
 }
-
-private val PsiMethod.controlFlow: ControlFlow
-    get() = ControlFlowFactory.getInstance(project).getControlFlow(
-        body!!,
-        AllVariablesControlFlowPolicy.getInstance()
-    )
-
 
 private val Project.psiFiles: List<PsiFile>
     get() {

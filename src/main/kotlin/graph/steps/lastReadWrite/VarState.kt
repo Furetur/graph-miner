@@ -18,23 +18,22 @@ class VarState(
     fun getLastWrites(variable: PsiVariable): Set<Offset> = lastWrites[variable] ?: emptySet()
 
     fun nextStateAfterVisit(offset: Offset, instruction: Instruction): VarState = when (instruction) {
-        is ReadVariableInstruction -> nextAfterNewRead(instruction.variable, offset)
-        is WriteVariableInstruction -> nextAfterNewWrite(instruction.variable, offset)
+        is ReadVariableInstruction -> nextStateAfterNewRead(instruction.variable, offset)
+        is WriteVariableInstruction -> nextStateAfterNewWrite(instruction.variable, offset)
         else -> this
     }
 
-
-    fun nextAfterNewRead(readVariable: PsiVariable, offset: Offset): VarState {
+    private fun nextStateAfterNewRead(readVariable: PsiVariable, readInstructionOffset: Offset): VarState {
         val newLastReads = lastReads.cloneIntoMutable()
         val newLastWrites = lastWrites.cloneIntoMutable()
-        newLastReads[readVariable] = mutableSetOf(offset)
+        newLastReads[readVariable] = mutableSetOf(readInstructionOffset)
         return VarState(newLastReads, newLastWrites)
     }
 
-    fun nextAfterNewWrite(writtenVariable: PsiVariable, offset: Offset): VarState {
+    private fun nextStateAfterNewWrite(writtenVariable: PsiVariable, writeInstructionOffset: Offset): VarState {
         val newLastReads = lastReads.cloneIntoMutable()
         val newLastWrites = lastWrites.cloneIntoMutable()
-        newLastWrites[writtenVariable] = mutableSetOf(offset)
+        newLastWrites[writtenVariable] = mutableSetOf(writeInstructionOffset)
         return VarState(newLastReads, newLastWrites)
     }
 

@@ -1,24 +1,19 @@
 package graph.steps.lastReadWrite
 
+import Edge
 import com.intellij.psi.PsiVariable
 import com.intellij.psi.controlFlow.Instruction
 import com.intellij.psi.controlFlow.ReadVariableInstruction
 import com.intellij.psi.controlFlow.WriteVariableInstruction
 import java.util.*
 
-data class FlowEdge(val from: Offset, val to: Offset)
-
-data class LastReadWriteEdges(val lastReadEdges: Set<FlowEdge>, val lastWriteEdges: Set<FlowEdge>)
+data class LastReadWriteEdges(val lastReadEdges: Set<Edge<Offset>>, val lastWriteEdges: Set<Edge<Offset>>)
 
 class LastReadWriteMiner(instructions: List<Instruction>) {
     private val nodes = instructions.withIndex().map { (offset, instruction) -> DataflowNode(offset, instruction) }
 
-    init {
-        require(instructions.isNotEmpty()) { "List of nodes must not be empty" }
-    }
-
     private val queue = PriorityQueue<DataflowNode>().apply {
-        add(nodes.first())
+        nodes.firstOrNull()?.let { add(it) }
     }
 
     fun build(): LastReadWriteEdges {
@@ -27,15 +22,15 @@ class LastReadWriteMiner(instructions: List<Instruction>) {
     }
 
     private fun calculateEdgesFromStates(): LastReadWriteEdges {
-        val lastReadEdges = mutableSetOf<FlowEdge>()
-        val lastWriteEdges = mutableSetOf<FlowEdge>()
+        val lastReadEdges = mutableSetOf<Edge<Offset>>()
+        val lastWriteEdges = mutableSetOf<Edge<Offset>>()
 
         for (node in nodes) {
-            val variable = node.touchedVariable ?: continue
+            val variable = node.variable ?: continue
             node.stateJustBeforeVisit?.getLastReads(variable)
                 ?.forEach { lastReadOffset ->
                     lastReadEdges.add(
-                        FlowEdge(
+                        Edge(
                             node.offset,
                             lastReadOffset
                         )
@@ -44,7 +39,7 @@ class LastReadWriteMiner(instructions: List<Instruction>) {
             node.stateJustBeforeVisit?.getLastWrites(variable)
                 ?.forEach { lastWriteOffset ->
                     lastWriteEdges.add(
-                        FlowEdge(
+                        Edge(
                             node.offset,
                             lastWriteOffset
                         )
@@ -65,11 +60,14 @@ class LastReadWriteMiner(instructions: List<Instruction>) {
 
     private fun visitNode(node: DataflowNode) {
         val stateAfterPreviousVisit = node.stateJustAfterVisit
-        for (nextOffset in node.nextOffsets) {
-            val nextNode = nodes[nextOffset]
-            nextNode.updateStateJustBeforeVisit(stateAfterPreviousVisit)
-            queue.add(nextNode)
-        }
+        node.nextOffsets
+            .filter { nextOffset -> nextOffset in nodes.indices }
+            .forEach { nextOffset ->
+                val nextNode = nodes[nextOffset]
+                nextNode.updateStateJustBeforeVisit(stateAfterPreviousVisit)
+                queue.add(nextNode)
+            }
+
     }
 }
 
@@ -85,7 +83,7 @@ private class DataflowNode(
         get() = (stateJustBeforeVisit ?: VarState.EMPTY).nextStateAfterVisit(offset, instruction)
     val nextOffsets: List<Offset>
         get() = (0 until instruction.nNext()).map { i -> instruction.getNext(offset, i) }
-    val touchedVariable: PsiVariable?
+    val variable: PsiVariable?
         get() = when (instruction) {
             is ReadVariableInstruction -> instruction.variable
             is WriteVariableInstruction -> instruction.variable
