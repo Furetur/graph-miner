@@ -27,7 +27,17 @@ repositories {
     mavenCentral()
 }
 dependencies {
+    implementation("com.github.ajalt.clikt:clikt:3.2.0")
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.1")
+
+    val utilitiesProjectName = "org.jetbrains.research.pluginUtilities"
+    dependencies {
+        implementation("$utilitiesProjectName:plugin-utilities-core") {
+            version {
+                branch = "open_repo"
+            }
+        }
+    }
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -110,5 +120,14 @@ tasks {
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+    }
+
+    runIde {
+        val input: String? by project
+        args = listOfNotNull("graph", input)
+        jvmArgs = listOf(
+            "-Djava.awt.headless=true", "-Djdk.module.illegalAccess.silent=true",
+            "--add-exports", "java.base/jdk.internal.vm=ALL-UNNAMED"
+        )
     }
 }
