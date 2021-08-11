@@ -14,6 +14,7 @@ import com.intellij.psi.controlFlow.ControlFlowFactory
 import com.intellij.psi.util.descendantsOfType
 import graph.steps.computedFrom.ComputedFromStep
 import graph.steps.lastReadWrite.LastReadWriteStep
+import graph.steps.nextToken.NextTokenStep
 import kotlin.system.exitProcess
 
 object PluginStarter : ApplicationStarter {
@@ -27,6 +28,8 @@ object PluginStarter : ApplicationStarter {
 
 class PluginCommand : CliktCommand() {
     private val input by argument("input").file(canBeDir = true, mustExist = true)
+
+    private val steps = listOf(LastReadWriteStep, ComputedFromStep, NextTokenStep)
 
     override fun run() {
         val project = ProjectUtil.openOrImport(input.toPath())
@@ -61,8 +64,9 @@ class PluginCommand : CliktCommand() {
 
     private fun processElement(psiElement: PsiElement) {
         val graphBuilder = GraphBuilder(psiElement)
-        LastReadWriteStep.build(graphBuilder)
-        ComputedFromStep.build(graphBuilder)
+        for (step in steps) {
+            step.build(graphBuilder)
+        }
         println(graphBuilder.graph())
     }
 }
