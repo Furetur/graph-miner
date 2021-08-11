@@ -15,6 +15,7 @@ import com.intellij.psi.util.descendantsOfType
 import graph.steps.computedFrom.ComputedFromStep
 import graph.steps.lastReadWrite.LastReadWriteStep
 import graph.steps.nextToken.NextTokenStep
+import graph.steps.returnsTo.ReturnsToStep
 import kotlin.system.exitProcess
 
 object PluginStarter : ApplicationStarter {
@@ -29,7 +30,7 @@ object PluginStarter : ApplicationStarter {
 class PluginCommand : CliktCommand() {
     private val input by argument("input").file(canBeDir = true, mustExist = true)
 
-    private val steps = listOf(LastReadWriteStep, ComputedFromStep, NextTokenStep)
+    private val steps = listOf(LastReadWriteStep, ComputedFromStep, NextTokenStep, ReturnsToStep)
 
     override fun run() {
         val project = ProjectUtil.openOrImport(input.toPath())
