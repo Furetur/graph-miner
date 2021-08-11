@@ -12,6 +12,7 @@ import com.intellij.psi.controlFlow.AllVariablesControlFlowPolicy
 import com.intellij.psi.controlFlow.ControlFlow
 import com.intellij.psi.controlFlow.ControlFlowFactory
 import com.intellij.psi.util.descendantsOfType
+import graph.steps.computedFrom.ComputedFromStep
 import graph.steps.lastReadWrite.LastReadWriteStep
 import kotlin.system.exitProcess
 
@@ -33,12 +34,35 @@ class PluginCommand : CliktCommand() {
         for (psiFile in project.psiFiles) {
             println("Building graph for file $psiFile")
             processElement(psiFile)
+
+            // experiments
+//            psiFile.descendantsOfType<PsiAssignmentExpression>().forEach {
+//                val lExpression = it.lExpression as? PsiReferenceExpression ?: return@forEach
+//                println("""
+//                    Assignment $it
+//                        ${it.lExpression} = ${it.rExpression}
+//                        lExpression: ${it.lExpression.references.joinToString(",")}
+//                        qualifier: ${lExpression.qualifier}
+//                        qualifierExpression: ${lExpression.qualifierExpression}
+//                        qualifiedName: ${lExpression.qualifiedName}
+//
+//                """.trimIndent())
+//            }
+//
+//            psiFile.descendantsOfType<PsiVariable>().forEach {
+//                println("""
+//                    Variable $it
+//                        name identifier ${it.nameIdentifier}
+//                        initializer ${it.initializer}
+//                """.trimIndent())
+//            }
         }
     }
 
     private fun processElement(psiElement: PsiElement) {
         val graphBuilder = GraphBuilder(psiElement)
         LastReadWriteStep.build(graphBuilder)
+        ComputedFromStep.build(graphBuilder)
         println(graphBuilder.graph())
     }
 }

@@ -1,13 +1,11 @@
-import java.util.Map;
-
 class Main {
 
     boolean field = true;
 
     public void largeMethod(boolean b) {
-        var a = 5;
+        var a = b;
         if (b) {
-            a = 6;
+            a = 6 + b;
         } else {
             a = 7;
         }
@@ -15,9 +13,12 @@ class Main {
     }
     public void f(int z) {
         if (field) {
-            field = false
+            field = (z % 2 == 0);
         }
         System.out.println(field);
+    }
+    public void mutatesField(Main main) {
+        main.field = !main.field;
     }
 
 }
