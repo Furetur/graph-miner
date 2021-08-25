@@ -18,10 +18,10 @@ object LastReadWriteStep : GraphBuildingStep {
 
     private fun buildForMethod(psiMethod: PsiMethod, graphBuilder: GraphBuilder) {
         val methodName = "${graphBuilder.root}/$psiMethod"
-        println("Building graph for $methodName")
+        println("Building graph for method $methodName")
         val controlFlow = psiMethod.body?.controlFlow ?: return
 
-        println("Extracted control flow for $methodName:\n$controlFlow")
+        println("Extracted control flow for method $methodName:\n$controlFlow")
 
         val (lastReadEdges, lastWriteEdges) = LastReadWriteMiner(controlFlow.instructions).build()
         addEdges("LastRead", lastReadEdges, graphBuilder, controlFlow)

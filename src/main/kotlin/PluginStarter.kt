@@ -16,6 +16,7 @@ import graph.steps.computedFrom.ComputedFromStep
 import graph.steps.lastReadWrite.LastReadWriteStep
 import graph.steps.nextToken.NextTokenStep
 import graph.steps.returnsTo.ReturnsToStep
+import org.jetbrains.research.pluginUtilities.openRepository.getKotlinJavaRepositoryOpener
 import kotlin.system.exitProcess
 
 object PluginStarter : ApplicationStarter {
@@ -33,11 +34,12 @@ class PluginCommand : CliktCommand() {
     private val steps = listOf(LastReadWriteStep, ComputedFromStep, NextTokenStep, ReturnsToStep)
 
     override fun run() {
-        val project = ProjectUtil.openOrImport(input.toPath())
-        println("Opened $project")
-        for (psiFile in project.psiFiles) {
-            println("Building graph for file $psiFile")
-            processElement(psiFile)
+        getKotlinJavaRepositoryOpener().openRepository(input) { project ->
+            println("Opened ${project.name}")
+            for (psiFile in project.psiFiles) {
+                println("Building graph for file $psiFile")
+                processElement(psiFile)
+            }
         }
     }
 
@@ -64,4 +66,4 @@ private fun Project.virtualFiles(): List<VirtualFile> =
             VfsUtil.collectChildrenRecursively(root).filter {
                 it.extension == "java" && it.canonicalPath != null
             }
-        }
+        }.distinct()

@@ -16,7 +16,6 @@ class ComputedFromMiner(private val graphBuilder: GraphBuilder) : JavaRecursiveE
     private val currentAssignments = Stack<PsiElement>()
 
     override fun visitAssignmentExpression(expression: PsiAssignmentExpression?) {
-        println("Visiting assignment expression $expression")
         val referenceExpression = expression?.lExpression as? PsiReferenceExpression
         if (referenceExpression != null) {
             currentAssignments.add(referenceExpression)
@@ -29,7 +28,6 @@ class ComputedFromMiner(private val graphBuilder: GraphBuilder) : JavaRecursiveE
     }
 
     override fun visitVariable(variable: PsiVariable?) {
-        println("Visiting variable $variable")
         val nameIdentifier = variable?.nameIdentifier
         val initializer = variable?.initializer
 
@@ -44,7 +42,6 @@ class ComputedFromMiner(private val graphBuilder: GraphBuilder) : JavaRecursiveE
     }
 
     override fun visitIdentifier(identifier: PsiIdentifier?) {
-        println("Visiting identifier $identifier")
         identifier?.let { addEdgesToIdentifier(it) }
     }
 

@@ -1,40 +1,27 @@
 # graph-miner
 
-![Build](https://github.com/Furetur/graph-miner/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-
-## Template ToDo list
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Verify the [pluginGroup](/gradle.properties), [plugin ID](/src/main/resources/META-INF/plugin.xml) and [sources package](/src/main/kotlin).
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
-- [ ] Set the Plugin ID in the above README badges.
-- [ ] Set the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
-
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
-
-To keep everything working, do not remove `<!-- ... -->` sections. 
+Extracts graphs from Java code
 <!-- Plugin description end -->
 
-## Installation
+## How to run
 
-- Using IDE built-in plugin system:
-  
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "graph-miner"</kbd> >
-  <kbd>Install Plugin</kbd>
-  
-- Manually:
+1. Clone this repository
+2. Get absolute path to `src/main/resources/data`, we will call it `<abspath>`
+3. Run `./gradlew runIde -Pinput=<abspath>`
 
-  Download the [latest release](https://github.com/Furetur/graph-miner/releases/latest) and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+## Output
 
+This plugin builds a `Graph` object that you will see in _stdout_.
 
----
-Plugin based on the [IntelliJ Platform Plugin Template][template].
+Each edge is a triple `(edgeType, vertex1, vertex2)` that is represented by `vertex1 -> vertex2`.
 
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
+**Example**
+
+For instance, this output corresponds to a graph that has 1 edge of type LastRead from vertex a to b.
+
+```
+Graph for ...
+    LastRead: [a -> b]
+```
