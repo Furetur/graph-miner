@@ -34,7 +34,7 @@ dependencies {
     dependencies {
         implementation("$utilitiesProjectName:plugin-utilities-core") {
             version {
-                branch = "open_repo"
+                branch = "main"
             }
         }
     }

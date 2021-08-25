@@ -7,6 +7,8 @@ import com.intellij.psi.controlFlow.ReadVariableInstruction
 import com.intellij.psi.controlFlow.WriteVariableInstruction
 import java.util.*
 
+typealias Offset = Int
+
 data class LastReadWriteEdges(val lastReadEdges: Set<Edge<Offset>>, val lastWriteEdges: Set<Edge<Offset>>)
 
 class LastReadWriteMiner(instructions: List<Instruction>) {
